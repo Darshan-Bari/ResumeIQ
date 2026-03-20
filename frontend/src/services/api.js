@@ -3,7 +3,7 @@
  * Handles all backend API calls and auth token persistence.
  */
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 console.log("API_BASE_URL:", API_BASE_URL);
 const TOKEN_KEY = 'resumeiq-token';
@@ -68,7 +68,7 @@ export const getAuthState = () => {
 // ============ AUTH ENDPOINTS ============
 
 export const signup = async (email, password) => {
-  const data = await request('/api/signup', {
+  const data = await request('/signup', {
     method: 'POST',
     headers: buildHeaders('', true),
     body: JSON.stringify({ email, password }),
@@ -80,7 +80,7 @@ export const signup = async (email, password) => {
 };
 
 export const login = async (email, password, role = '') => {
-  const data = await request('/api/login', {
+  const data = await request('/login', {
     method: 'POST',
     headers: buildHeaders('', true),
     body: JSON.stringify({ email, password, role: role || undefined }),
@@ -92,7 +92,7 @@ export const login = async (email, password, role = '') => {
 };
 
 export const adminLogin = async (email, password) => {
-  const data = await request('/api/admin/login', {
+  const data = await request('/admin/login', {
     method: 'POST',
     headers: buildHeaders('', true),
     body: JSON.stringify({ email, password }),
@@ -104,7 +104,7 @@ export const adminLogin = async (email, password) => {
 };
 
 export const getMe = async (token) => {
-  return await request('/api/auth/me', {
+  return await request('/auth/me', {
     method: 'GET',
     headers: buildHeaders(token, false),
   });
@@ -127,7 +127,7 @@ export const uploadResume = async (file, candidateName, codingProfiles = {}, aut
     formData.append('password', authPayload.password);
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/candidate/upload-resume`, {
+  const response = await fetch(`${API_BASE_URL}/candidate/upload-resume`, {
     method: 'POST',
     headers: authPayload.token ? { Authorization: `Bearer ${authPayload.token}` } : {},
     body: formData,
@@ -146,7 +146,7 @@ export const uploadResume = async (file, candidateName, codingProfiles = {}, aut
 };
 
 export const saveCandidateProfile = async (profileData, token) => {
-  return await request('/api/candidate/profile', {
+  return await request('/candidate/profile', {
     method: 'PUT',
     headers: buildHeaders(token, true),
     body: JSON.stringify(profileData),
@@ -154,14 +154,14 @@ export const saveCandidateProfile = async (profileData, token) => {
 };
 
 export const getCandidateDashboard = async (token) => {
-  return await request('/api/candidate/dashboard', {
+  return await request('/candidate/dashboard', {
     method: 'GET',
     headers: buildHeaders(token, false),
   });
 };
 
 export const deleteCandidateAccount = async (token) => {
-  return await request('/api/candidate/account', {
+  return await request('/candidate/account', {
     method: 'DELETE',
     headers: buildHeaders(token, false),
   });
@@ -277,5 +277,5 @@ export const deleteAdminJob = async (jobId, token) => {
 // ============ UTILITY ENDPOINTS ============
 
 export const healthCheck = async () => {
-  return await request('/api/health', { method: 'GET' });
+  return await request('/health', { method: 'GET' });
 };
