@@ -68,7 +68,7 @@ export const getAuthState = () => {
 // ============ AUTH ENDPOINTS ============
 
 export const signup = async (email, password) => {
-  const data = await request('/signup', {
+  const data = await request('/api/signup', {
     method: 'POST',
     headers: buildHeaders('', true),
     body: JSON.stringify({ email, password }),
@@ -80,7 +80,7 @@ export const signup = async (email, password) => {
 };
 
 export const login = async (email, password, role = '') => {
-  const data = await request('/login', {
+  const data = await request('/api/login', {
     method: 'POST',
     headers: buildHeaders('', true),
     body: JSON.stringify({ email, password, role: role || undefined }),
@@ -92,7 +92,7 @@ export const login = async (email, password, role = '') => {
 };
 
 export const adminLogin = async (email, password) => {
-  const data = await request('/admin/login', {
+  const data = await request('/api/admin/login', {
     method: 'POST',
     headers: buildHeaders('', true),
     body: JSON.stringify({ email, password }),
@@ -104,7 +104,7 @@ export const adminLogin = async (email, password) => {
 };
 
 export const getMe = async (token) => {
-  return await request('/auth/me', {
+  return await request('/api/auth/me', {
     method: 'GET',
     headers: buildHeaders(token, false),
   });
@@ -127,7 +127,7 @@ export const uploadResume = async (file, candidateName, codingProfiles = {}, aut
     formData.append('password', authPayload.password);
   }
 
-  const response = await fetch(`${API_BASE_URL}/candidate/upload-resume`, {
+  const response = await fetch(`${API_BASE_URL}/api/candidate/upload-resume`, {
     method: 'POST',
     headers: authPayload.token ? { Authorization: `Bearer ${authPayload.token}` } : {},
     body: formData,
@@ -146,7 +146,7 @@ export const uploadResume = async (file, candidateName, codingProfiles = {}, aut
 };
 
 export const saveCandidateProfile = async (profileData, token) => {
-  return await request('/candidate/profile', {
+  return await request('/api/candidate/profile', {
     method: 'PUT',
     headers: buildHeaders(token, true),
     body: JSON.stringify(profileData),
@@ -154,14 +154,14 @@ export const saveCandidateProfile = async (profileData, token) => {
 };
 
 export const getCandidateDashboard = async (token) => {
-  return await request('/candidate/dashboard', {
+  return await request('/api/candidate/dashboard', {
     method: 'GET',
     headers: buildHeaders(token, false),
   });
 };
 
 export const deleteCandidateAccount = async (token) => {
-  return await request('/candidate/account', {
+  return await request('/api/candidate/account', {
     method: 'DELETE',
     headers: buildHeaders(token, false),
   });
@@ -170,7 +170,7 @@ export const deleteCandidateAccount = async (token) => {
 // ============ RECRUITER ENDPOINTS ============
 
 export const createJob = async (jobData, token = '') => {
-  return await request('/recruiter/job/create', {
+  return await request('/api/recruiter/job/create', {
     method: 'POST',
     headers: buildHeaders(token, true),
     body: JSON.stringify(jobData),
@@ -178,7 +178,7 @@ export const createJob = async (jobData, token = '') => {
 };
 
 export const getJobs = async () => {
-  return await request('/recruiter/jobs', { method: 'GET' });
+  return await request('/api/recruiter/jobs', { method: 'GET' });
 };
 
 export const matchCandidates = async (jobId, candidateIds = null, jobData = null) => {
@@ -191,7 +191,7 @@ export const matchCandidates = async (jobId, candidateIds = null, jobData = null
     payload.required_skills = jobData.required_skills;
   }
 
-  return await request('/recruiter/job/match', {
+  return await request('/api/recruiter/job/match', {
     method: 'POST',
     headers: buildHeaders(getAuthState().token, true),
     body: JSON.stringify(payload),
@@ -199,7 +199,7 @@ export const matchCandidates = async (jobId, candidateIds = null, jobData = null
 };
 
 export const recruiterSignup = async (email, password) => {
-  const data = await request('/recruiter/signup', {
+  const data = await request('/api/recruiter/signup', {
     method: 'POST',
     headers: buildHeaders('', true),
     body: JSON.stringify({ email, password }),
@@ -211,7 +211,7 @@ export const recruiterSignup = async (email, password) => {
 };
 
 export const recruiterLogin = async (email, password) => {
-  const data = await request('/recruiter/login', {
+  const data = await request('/api/recruiter/login', {
     method: 'POST',
     headers: buildHeaders('', true),
     body: JSON.stringify({ email, password }),
@@ -223,52 +223,52 @@ export const recruiterLogin = async (email, password) => {
 };
 
 export const getRecruiterDashboard = async (token) => {
-  return await request('/recruiter/dashboard', {
+  return await request('/api/recruiter/dashboard', {
     method: 'GET',
     headers: buildHeaders(token, false),
   });
 };
 
 export const getAllCandidates = async () => {
-  return await request('/recruiter/candidates', { method: 'GET' });
+  return await request('/api/recruiter/candidates', { method: 'GET' });
 };
 
 export const getCandidateDetails = async (candidateId) => {
-  return await request(`/recruiter/candidate/${candidateId}`, { method: 'GET' });
+  return await request(`/api/recruiter/candidate/${candidateId}`, { method: 'GET' });
 };
 
 // ============ ADMIN ENDPOINTS ============
 
 export const getAdminOverview = async (token) => {
-  return await request('/admin/overview', {
+  return await request('/api/admin/overview', {
     method: 'GET',
     headers: buildHeaders(token, false),
   });
 };
 
 export const getAdminCandidates = async (token) => {
-  return await request('/admin/candidates', {
+  return await request('/api/admin/candidates', {
     method: 'GET',
     headers: buildHeaders(token, false),
   });
 };
 
 export const deleteAdminCandidate = async (candidateId, token) => {
-  return await request(`/admin/candidates/${candidateId}`, {
+  return await request(`/api/admin/candidates/${candidateId}`, {
     method: 'DELETE',
     headers: buildHeaders(token, false),
   });
 };
 
 export const getAdminJobs = async (token) => {
-  return await request('/admin/jobs', {
+  return await request('/api/admin/jobs', {
     method: 'GET',
     headers: buildHeaders(token, false),
   });
 };
 
 export const deleteAdminJob = async (jobId, token) => {
-  return await request(`/admin/jobs/${jobId}`, {
+  return await request(`/api/admin/jobs/${jobId}`, {
     method: 'DELETE',
     headers: buildHeaders(token, false),
   });
@@ -277,5 +277,5 @@ export const deleteAdminJob = async (jobId, token) => {
 // ============ UTILITY ENDPOINTS ============
 
 export const healthCheck = async () => {
-  return await request('/health', { method: 'GET' });
+  return await request('/api/health', { method: 'GET' });
 };
