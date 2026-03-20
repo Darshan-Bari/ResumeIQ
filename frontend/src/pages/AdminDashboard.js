@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {
-  approveAdminRecruiter,
-  deleteAdminRecruiter,
   deleteAdminCandidate,
   deleteAdminJob,
   getAdminCandidates,
@@ -75,29 +73,29 @@ function AdminDashboard({ token, onLogout, setCurrentRole }) {
     }
   };
 
-  const handleApproveRecruiter = async (recruiterId) => {
-    try {
-      await approveAdminRecruiter(recruiterId, token);
-      setMessage('Recruiter approved');
-      await loadAdminData();
-    } catch (error) {
-      setMessage(`Error: ${error.message}`);
-    }
-  };
+  // const handleApproveRecruiter = async (recruiterId) => {
+  //   try {
+  //     await approveAdminRecruiter(recruiterId, token);
+  //     setMessage('Recruiter approved');
+  //     await loadAdminData();
+  //   } catch (error) {
+  //     setMessage(`Error: ${error.message}`);
+  //   }
+  // };
 
-  const handleDeleteRecruiter = async (recruiterId) => {
-    if (!window.confirm('Delete this recruiter account and all jobs created by this recruiter?')) {
-      return;
-    }
+  // const handleDeleteRecruiter = async (recruiterId) => {
+  //   if (!window.confirm('Delete this recruiter account and all jobs created by this recruiter?')) {
+  //     return;
+  //   }
 
-    try {
-      await deleteAdminRecruiter(recruiterId, token);
-      setMessage('Recruiter deleted');
-      await loadAdminData();
-    } catch (error) {
-      setMessage(`Error: ${error.message}`);
-    }
-  };
+  //   try {
+  //     await deleteAdminRecruiter(recruiterId, token);
+  //     setMessage('Recruiter deleted');
+  //     await loadAdminData();
+  //   } catch (error) {
+  //     setMessage(`Error: ${error.message}`);
+  //   }
+  // };
 
   return (
     <div className="recruiter-portal">
@@ -144,13 +142,13 @@ function AdminDashboard({ token, onLogout, setCurrentRole }) {
                       </div>
                       <div style={{ display: 'flex', gap: 8 }}>
                         {!recruiter.is_approved && (
-                          <button className="btn btn-primary" onClick={() => handleApproveRecruiter(recruiter.user_id)}>
-                            Approve
-                          </button>
-                        )}
-                        <button className="btn btn-secondary" onClick={() => handleDeleteRecruiter(recruiter.user_id)}>
-                          Delete
-                        </button>
+                        //   <button className="btn btn-primary" onClick={() => handleApproveRecruiter(recruiter.user_id)}>
+                        //     Approve
+                        //   </button>
+                        // )}
+                        // <button className="btn btn-secondary" onClick={() => handleDeleteRecruiter(recruiter.user_id)}>
+                        //   Delete
+                        // </button>
                       </div>
                     </div>
                   </article>
