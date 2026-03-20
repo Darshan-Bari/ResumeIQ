@@ -3,7 +3,9 @@
  * Handles all backend API calls and auth token persistence.
  */
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://127.0.0.1:5000/api';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
+console.log("API_BASE_URL:", API_BASE_URL);
 const TOKEN_KEY = 'resumeiq-token';
 const USER_KEY = 'resumeiq-user';
 
@@ -165,28 +167,6 @@ export const deleteCandidateAccount = async (token) => {
   });
 };
 
-export const getCandidateAvailableJobs = async (token) => {
-  return await request('/candidate/jobs', {
-    method: 'GET',
-    headers: buildHeaders(token, false),
-  });
-};
-
-export const applyToJob = async (jobId, token) => {
-  return await request(`/candidate/jobs/${jobId}/apply`, {
-    method: 'POST',
-    headers: buildHeaders(token, true),
-    body: JSON.stringify({}),
-  });
-};
-
-export const getAppliedJobs = async (token) => {
-  return await request('/candidate/applied-jobs', {
-    method: 'GET',
-    headers: buildHeaders(token, false),
-  });
-};
-
 // ============ RECRUITER ENDPOINTS ============
 
 export const createJob = async (jobData, token = '') => {
@@ -249,22 +229,6 @@ export const getRecruiterDashboard = async (token) => {
   });
 };
 
-export const updateCandidateStatus = async (jobId, candidateId, status, token) => {
-  return await request(`/recruiter/job/${jobId}/candidate/${candidateId}/status`, {
-    method: 'PUT',
-    headers: buildHeaders(token, true),
-    body: JSON.stringify({ status }),
-  });
-};
-
-export const updateCandidateShortlist = async (jobId, candidateId, shortlisted, token) => {
-  return await request(`/recruiter/job/${jobId}/candidate/${candidateId}/shortlist`, {
-    method: 'PUT',
-    headers: buildHeaders(token, true),
-    body: JSON.stringify({ shortlisted }),
-  });
-};
-
 export const getAllCandidates = async () => {
   return await request('/recruiter/candidates', { method: 'GET' });
 };
@@ -305,28 +269,6 @@ export const getAdminJobs = async (token) => {
 
 export const deleteAdminJob = async (jobId, token) => {
   return await request(`/admin/jobs/${jobId}`, {
-    method: 'DELETE',
-    headers: buildHeaders(token, false),
-  });
-};
-
-export const getAdminRecruiters = async (token) => {
-  return await request('/admin/recruiters', {
-    method: 'GET',
-    headers: buildHeaders(token, false),
-  });
-};
-
-export const approveAdminRecruiter = async (recruiterId, token) => {
-  return await request(`/admin/recruiters/${recruiterId}/approve`, {
-    method: 'PUT',
-    headers: buildHeaders(token, true),
-    body: JSON.stringify({}),
-  });
-};
-
-export const deleteAdminRecruiter = async (recruiterId, token) => {
-  return await request(`/admin/recruiters/${recruiterId}`, {
     method: 'DELETE',
     headers: buildHeaders(token, false),
   });
