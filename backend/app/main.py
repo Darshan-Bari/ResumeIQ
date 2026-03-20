@@ -30,7 +30,12 @@ def home():
 @app.route("/test")
 def test():
     return "Test OK"
-    
+
+
+@app.route("/api/jobs")
+def get_jobs():
+    return {"jobs": ["Demo Job 1", "Demo Job 2"]}
+
 frontend_origins = os.getenv("FRONTEND_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")
 allowed_origins = [origin.strip() for origin in frontend_origins.split(",") if origin.strip()]
 CORS(
