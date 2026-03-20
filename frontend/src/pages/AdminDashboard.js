@@ -6,8 +6,9 @@ import {
   deleteAdminJob,
   getAdminCandidates,
   getAdminJobs,
+  getAdminOverview,
 
-} 
+} from '../services/api';
 
 function AdminDashboard({ token, onLogout, setCurrentRole }) {
   const [stats, setStats] = useState({ total_candidates: 0, total_jobs: 0, total_users: 0 });
@@ -25,12 +26,11 @@ function AdminDashboard({ token, onLogout, setCurrentRole }) {
     setLoading(true);
     setMessage('');
     try {
-      const [overview, candidateData, jobData, recruiterData] = await Promise.all([
-        getAdminOverview(token),
-        getAdminCandidates(token),
-        getAdminJobs(token),
-        getAdminRecruiters(token),
-      ]);
+      const [overview, candidateData, jobData] = await Promise.all([
+    getAdminOverview(token),
+    getAdminCandidates(token),
+    getAdminJobs(token),
+    ]);
 
       setStats(overview.stats || { total_candidates: 0, total_jobs: 0, total_users: 0 });
       setCandidates(candidateData.candidates || []);
