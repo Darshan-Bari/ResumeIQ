@@ -6,10 +6,8 @@ import {
   deleteAdminJob,
   getAdminCandidates,
   getAdminJobs,
-  getAdminOverview,
-  getAdminRecruiters,
-} from '../services/api';
-import '../styles/RecruiterPortal.css';
+
+} 
 
 function AdminDashboard({ token, onLogout, setCurrentRole }) {
   const [stats, setStats] = useState({ total_candidates: 0, total_jobs: 0, total_users: 0 });
@@ -37,7 +35,7 @@ function AdminDashboard({ token, onLogout, setCurrentRole }) {
       setStats(overview.stats || { total_candidates: 0, total_jobs: 0, total_users: 0 });
       setCandidates(candidateData.candidates || []);
       setJobs(jobData.jobs || []);
-      setRecruiters(recruiterData.recruiters || []);
+      // setRecruiters(recruiterData.recruiters || []);
     } catch (error) {
       setMessage(`Error: ${error.message}`);
     } finally {
