@@ -272,10 +272,27 @@ export const deleteAdminJob = async (jobId, token) => {
     method: 'DELETE',
     headers: buildHeaders(token, false),
   });
+
+
+  
 };
 
 // ============ UTILITY ENDPOINTS ============
 
 export const healthCheck = async () => {
   return await request('/health', { method: 'GET' });
+
+};
+
+// 👇 ADD HERE
+export const getAdminRecruiters = async (token) => {
+  return { recruiters: [] };
+};
+
+export const approveAdminRecruiter = async (id, token) => {
+  return { message: "ok" };
+};
+
+export const deleteAdminRecruiter = async (id, token) => {
+  return { message: "ok" };
 };
