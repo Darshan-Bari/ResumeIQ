@@ -63,7 +63,7 @@ function RecruiterPortal({ setCurrentRole, authState, onLogout }) {
       setLoading(false);
     }
   };
-
+// eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadDashboard();
   }, [authState?.token]);

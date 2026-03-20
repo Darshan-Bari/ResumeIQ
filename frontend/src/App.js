@@ -84,7 +84,7 @@ function App() {
       }
     };
     validateSession();
-  }, []);
+  }, [authState.token]);
 
   const themeLabel = useMemo(() => (theme === 'light' ? 'Dark Mode' : 'Light Mode'), [theme]);
 
