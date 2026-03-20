@@ -1,0 +1,107 @@
+MICHAEL CHEN
+michael.chen@example.com | +91-7654321098
+LinkedIn: linkedin.com/in/michaelchen | GitHub: github.com/michaelchen | CodeChef: codechef.com/users/chen
+
+==============================================
+PROFESSIONAL PROFILE
+==============================================
+
+Software Engineer with 4+ years specializing in backend development and system design.
+Expert in Java, Spring Boot, microservices architecture, and distributed systems.
+Passionate about writing high-quality, scalable code and mentoring junior developers.
+
+
+==============================================
+TECHNICAL EXPERTISE
+==============================================
+
+Programming Languages: Java, Python, JavaScript, SQL, C++
+Backend Frameworks: Spring Boot, Spring Cloud, Django, FastAPI
+Databases: PostgreSQL, MySQL, MongoDB, Redis, Cassandra
+Cloud & Infrastructure: AWS, Azure, Google Cloud, Docker, Kubernetes
+Message Queues: Kafka, RabbitMQ, Redis
+Development Tools: Maven, Gradle, Git, Jenkins, SonarQube
+Testing: JUnit, Mockito, pytest, pytest-cov
+SOLID Principles & Design Patterns
+
+
+==============================================
+PROFESSIONAL EXPERIENCE
+==============================================
+
+Senior Software Engineer | Enterprise Solutions Inc. | Jan 2021 - Present
+- Architected microservices-based payment processing system handling 10M+ transactions/day
+- Designed and implemented event-driven architecture using Kafka
+- Led team of 5 engineers in agile environment, conducting code reviews
+- Implemented circuit breakers and resilience patterns using Spring Cloud
+- Reduced API latency by 60% through caching and optimization
+- Mentored 3 junior developers on system design principles
+
+Software Engineer | CloudTech Systems | Jul 2018 - Dec 2020
+- Developed RESTful APIs using Spring Boot serving 1M+ requests/day
+- Implemented database optimization techniques, reducing queries by 50%
+- Built distributed caching layer using Redis, improving response time to <50ms
+- Integrated with third-party APIs and payment gateways
+- Participated in designing scalable architecture for growing user base
+- Contributed to open-source Spring Boot projects
+
+Junior Software Developer | StartupAI | Jun 2017 - Jun 2018
+- Developed features for data processing pipeline in Python
+- Fixed bugs and participated in code reviews
+- Learned industry best practices and software development lifecycle
+
+
+==============================================
+EDUCATION
+==============================================
+
+Bachelor of Engineering in Computer Science
+National Institute of Technology, Trichy | 2017
+CGPA: 8.7/10
+
+
+==============================================
+KEY PROJECTS & ACHIEVEMENTS
+==============================================
+
+1. Payment Processing Microservice
+   - Built event-driven system using Spring Boot and Kafka
+   - Achieved 99.99% availability with load balancing
+   - Processed 10M+ daily transactions
+   - Technologies: Java, Spring Boot, PostgreSQL, Kafka, Docker, Kubernetes
+
+2. Real-time Analytics Platform
+   - Implemented streaming pipeline with distributed processing
+   - Built dashboard for real-time metrics and monitoring
+   - Technologies: Java, Kafka, Elasticsearch, Python, Grafana
+
+3. Cache-optimized Database Layer
+   - Designed multi-level caching strategy with Redis
+   - Reduced database load by 70%
+   - Improved API response times significantly
+
+Internal Trainer for Microservices Architecture (2021-2022):
+- Conducted 10+ technical sessions on Spring Cloud and Kafka
+- Helped 15+ team members upskill in distributed systems
+
+
+==============================================
+CERTIFICATIONS & RECOGNITION
+==============================================
+
+- AWS Solutions Architect Associate (2020)
+- Certified Kafka Developer (2019)
+- Spring Professional Certification (2018)
+- Consistent performer in performance reviews (Rating: 4.5/5)
+
+
+==============================================
+ADDITIONAL SKILLS
+==============================================
+
+- System design and architecture
+- Database optimization and query tuning
+- Performance profiling and debugging
+- Problem-solving and analytical thinking
+- Documentation and technical writing
+- Mentoring and knowledge sharing

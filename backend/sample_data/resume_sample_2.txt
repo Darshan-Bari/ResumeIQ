@@ -1,0 +1,91 @@
+PRIYA SHARMA
+priya.sharma@example.com | +91-8765432100
+LinkedIn: linkedin.com/in/priyasharma | GitHub: github.com/priyasharma
+
+==============================================
+SUMMARY
+==============================================
+
+Data Science Engineer with 2+ years of experience in machine learning and data analysis.
+Expertise in Python, TensorFlow, scikit-learn, and cloud platforms. Strong analytical
+and communication skills with proven track record of delivering impactful projects.
+
+
+==============================================
+TECHNICAL SKILLS
+==============================================
+
+Languages: Python, SQL, R, JavaScript
+Machine Learning: TensorFlow, PyTorch, scikit-learn, Keras
+Data Analysis: Pandas, NumPy, Matplotlib, Seaborn
+Databases: PostgreSQL, MongoDB, DynamoDB
+Cloud Platforms: AWS, Google Cloud Platform
+Tools: Jupyter, Git, Docker, Tableau
+ML Specializations: Deep Learning, NLP, Computer Vision
+
+
+==============================================
+PROFESSIONAL EXPERIENCE
+==============================================
+
+Data Science Engineer | DataCore Ltd. | Mar 2021 - Present
+- Developed predictive models for customer churn, achieving 92% accuracy
+- Built deep learning pipeline for image classification using TensorFlow
+- Analyzed large datasets (10GB+) using Pandas and SQL
+- Created interactive dashboards using Tableau for business insights
+- Implemented machine learning ops practices for model deployment
+
+Junior Data Scientist | AnalyticsHub | Aug 2019 - Feb 2021
+- Performed exploratory data analysis on customer behavior data
+- Built recommendation systems using scikit-learn
+- Preprocessed and cleaned data pipelines
+- Collaborated with product team on data-driven decisions
+- Improved model accuracy by 15% through feature engineering
+
+
+==============================================
+EDUCATION
+==============================================
+
+Master of Science in Data Science
+Delhi University | 2019
+GPA: 8.5/10
+
+Bachelor of Science (B.Sc) in Mathematics
+Delhi University | 2017
+GPA: 8.8/10
+
+
+==============================================
+PROJECTS
+==============================================
+
+1. Customer Churn Prediction Model
+   - Built logistic regression and random forest models
+   - Achieved 92% accuracy with ROC-AUC of 0.89
+   - Technologies: Python, scikit-learn, Pandas
+
+2. Image Classification using Deep Learning
+   - Implemented CNN architecture for image recognition
+   - Trained on 50,000+ images with 95% validation accuracy
+   - Technologies: TensorFlow, Keras, Python
+
+3. Sentiment Analysis NLP Pipeline
+   - Created text preprocessing and tokenization pipeline
+   - Built BERT-based sentiment classifier
+   - Deployed on AWS Lambda for real-time inference
+
+Kaggle: Rank 847 with multiple competition wins
+
+
+==============================================
+SKILLS HIGHLIGHTS
+==============================================
+
+- Advanced statistical analysis and hypothesis testing
+- Time series forecasting and trend analysis
+- Feature engineering and dimensionality reduction
+- Model evaluation and hyperparameter tuning
+- Data visualization and storytelling
+- Strong SQL for complex data queries
+- Familiar with Agile methodology

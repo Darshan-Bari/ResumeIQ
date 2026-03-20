@@ -1,0 +1,81 @@
+JOHN DOE
+john.doe@example.com | +91-9876543210
+LinkedIn: linkedin.com/in/johndoe | GitHub: github.com/johndoe
+LeetCode: leetcode.com/johndoe | CodeChef: codechef.com/users/johndoe
+
+==============================================
+PROFESSIONAL SUMMARY
+==============================================
+
+Full-Stack Developer with 3+ years of experience building scalable web applications
+using modern technologies. Proficient in Python, JavaScript, React, Django, and AWS.
+Passionate about creating clean, maintainable code and solving complex problems.
+
+
+==============================================
+TECHNICAL SKILLS
+==============================================
+
+Languages: Python, JavaScript, Java, SQL
+Web Frameworks: Django, React, Express.js, FastAPI
+Databases: PostgreSQL, MongoDB, Redis
+Cloud & DevOps: AWS (EC2, S3, Lambda), Docker, Kubernetes, Jenkins
+Tools: Git, GitHub, Jira, VS Code, Postman
+Methodologies: Agile, REST API Design, Microservices
+
+
+==============================================
+PROFESSIONAL EXPERIENCE
+==============================================
+
+Senior Full-Stack Developer | Tech Corp Inc. | Jan 2022 - Present
+- Led development of a microservices-based platform serving 100K+ users
+- Implemented REST APIs with Django and FastAPI, achieving 99.9% uptime
+- Optimized database queries using PostgreSQL, reducing load time by 40%
+- Containerized applications using Docker and orchestrated with Kubernetes
+- Mentored 3 junior developers and conducted code reviews
+
+Full-Stack Developer | Innovative Solutions Ltd. | Jul 2020 - Dec 2021
+- Developed responsive front-end interfaces using React and JavaScript
+- Built backend services with Django and Python
+- Deployed applications on AWS using EC2, S3, and Lambda
+- Implemented CI/CD pipelines using Jenkins and GitLab CI
+- Improved API response time by 50% through performance optimization
+
+Junior Developer | StartupXYZ | Jun 2019 - Jun 2020
+- Assisted in building e-commerce platform with Python and JavaScript
+- Worked on bug fixes and feature implementation
+- Participated in Agile sprint planning and daily standup meetings
+
+
+==============================================
+EDUCATION
+==============================================
+
+Bachelor of Technology (B.Tech) in Computer Science
+Indian Institute of Technology, Delhi | 2019
+CGPA: 8.2/10
+
+
+==============================================
+PROJECTS & CERTIFICATIONS
+==============================================
+
+Projects:
+- AI Resume Screener: Built end-to-end resume matching system using TF-IDF
+- E-commerce Platform: Full-stack project with 10K+ products and payment integration
+- Real-time Chat Application: Developed using WebSockets and React
+
+Certifications:
+- AWS Certified Solutions Architect Associate (2021)
+- Python Advanced Developer (2020)
+
+
+==============================================
+ADDITIONAL INFORMATION
+==============================================
+
+- Strong problem-solving skills with competitive programming background
+- Experience with system design and scalable architecture
+- Excellent communication and team collaboration
+- Continuous learner and technology enthusiast

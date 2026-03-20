@@ -1,0 +1,101 @@
+SARAH JOHNSON
+sarah.johnson@example.com | +91-6543210987
+LinkedIn: linkedin.com/in/sarahjohnson | GitHub: github.com/sarahjohnson | LeetCode: leetcode.com/sarahjohnson
+
+==============================================
+OBJECTIVE
+==============================================
+
+Recent graduate seeking opportunities in Full-Stack Web Development. Proficient in
+React, JavaScript, and Python with hands-on experience in building web applications.
+Eager to learn and contribute to innovative projects.
+
+
+==============================================
+TECHNICAL SKILLS
+==============================================
+
+Frontend: HTML5, CSS3, JavaScript (ES6+), React, Redux
+Backend: Python, Node.js, Express, Django
+Databases: MongoDB, PostgreSQL, MySQL
+Version Control: Git, GitHub
+Tools: VS Code, Chrome DevTools, Postman
+Other: REST APIs, Responsive Design, SSL/TLS
+
+
+==============================================
+EDUCATION
+==============================================
+
+Bachelor of Science in Computer Science
+University of Technology | 2023
+
+Relevant Coursework:
+- Data Structures and Algorithms
+- Database Management Systems
+- Web Development (Full Stack)
+- Software Engineering
+- Object-Oriented Programming
+
+
+==============================================
+PROJECTS & EXPERIENCE
+==============================================
+
+1. E-commerce Web Application (Jan 2023 - Apr 2023)
+   - Developed full-stack application with React frontend and Node.js backend
+   - Implemented user authentication and product catalog
+   - Integrated payment gateway for transactions
+   - Technologies: React, Node.js, MongoDB, Express, JWT
+
+2. Task Management Dashboard (Oct 2022 - Dec 2022)
+   - Built React component-based task manager application
+   - Implemented local storage for data persistence
+   - Created responsive UI with CSS Flexbox and Grid
+   - Technologies: React, JavaScript, HTML5, CSS3
+
+3. Blog Platform (May 2022 - Jul 2022)
+   - Developed blog application with Python Django
+   - Implemented user authentication and post creation
+   - Created admin panel for content management
+   - Technologies: Django, PostgreSQL, HTML, CSS
+
+Internship: Junior Web Developer | TechStartup Inc. (Jun 2022 - Aug 2022)
+- Assisted in building company website with React
+- Fixed bugs and implemented UI improvements
+- Participated in daily standup meetings
+- Learned industry development practices
+
+
+==============================================
+CERTIFICATIONS & ONLINE COURSES
+==============================================
+
+- Complete Web Developer Bootcamp 2023 (Udemy)
+- The Complete JavaScript Course 2023 (Udemy)
+- React - The Complete Guide (Udemy)
+- CS50 Computer Science Fundamentals (edX)
+
+
+==============================================
+SKILLS SUMMARY
+==============================================
+
+- Strong foundation in Data Structures and Algorithms
+- Web development with modern JavaScript frameworks
+- Responsive web design principles
+- RESTful API design and consumption
+- Problem-solving and debugging
+- Quick learner and adaptable to new technologies
+- Collaborative and communication skills
+- Active on competitive coding platforms (LeetCode, HackerRank)
+
+
+==============================================
+ADDITIONAL INFORMATION
+==============================================
+
+Languages: English (Fluent), Hindi (Native)
+Location: Bangalore, India
+Availability: Immediately
+Portfolio: sarahjohnsonportfolio.com

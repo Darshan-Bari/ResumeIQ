@@ -1,0 +1,67 @@
+Full-Stack Developer - Job Description
+========================================
+
+Position: Full-Stack Developer
+Company: TechCorp Solutions
+Location: Remote (Bangalore, India)
+Experience Level: 3-5 years
+
+Job Summary:
+We are looking for an experienced Full-Stack Developer to join our growing engineering team. 
+You will be responsible for building and maintaining scalable web applications across the entire 
+technology stack. This role offers the opportunity to work with cutting-edge technologies and 
+contribute to products used by thousands of users.
+
+Responsibilities:
+• Design and implement RESTful APIs using Python/Node.js
+• Build responsive user interfaces with React and modern JavaScript
+• Optimize database queries and improve application performance
+• Implement security best practices and data protection
+• Participate in code reviews and mentor junior developers
+• Collaborate with product and design teams
+• Deploy and monitor applications on cloud platforms
+• Troubleshoot and debug production issues
+
+Required Technical Skills:
+- Python (Django/FastAPI) or Node.js/Express
+- React and modern JavaScript (ES6+)
+- PostgreSQL or similar relational databases
+- RESTful API design and implementation
+- Git and version control
+- HTML5 and CSS3
+- SQL and database optimization
+
+Preferred Skills:
+- MongoDB or other NoSQL databases
+- Docker and containerization
+- AWS, Azure, or Google Cloud Platform
+- Microservices architecture
+- Redis or caching solutions
+- Kubernetes
+- CI/CD pipelines (Jenkins, GitLab CI)
+- GraphQL
+
+Nice to Have:
+- Experience with agile methodology
+- Knowledge of system design
+- Open source contributions
+- AWS Certification
+- Strong problem-solving skills
+
+What We Offer:
+- Competitive salary and benefits
+- Remote work flexibility
+- Learning and development budget
+- Health insurance
+- Collaborative work environment
+- Career growth opportunities
+
+Requirements:
+- Bachelor's degree in Computer Science or related field (or equivalent experience)
+- 3+ years of professional Full-Stack development experience
+- Strong problem-solving and communication skills
+- Ability to work independently and in teams
+- Available for immediate joining
+
+To Apply:
+Please submit your resume, coding portfolio, and GitHub profile to: jobs@techcorp.com
