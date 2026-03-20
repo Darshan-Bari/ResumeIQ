@@ -23,6 +23,12 @@ app = Flask(__name__)
 load_dotenv()
 # ✅ ADD THIS PART ↓↓↓
 
+CORS(
+    app,
+    resources={r"/api/*": {"origins": "*"}},
+    supports_credentials=False
+)
+
 @app.route("/")
 def home():
     return "ResumeIQ Backend Running 🚀"
@@ -36,13 +42,7 @@ def test():
 def get_jobs():
     return {"jobs": ["Demo Job 1", "Demo Job 2"]}
 
-frontend_origins = os.getenv("FRONTEND_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")
-allowed_origins = [origin.strip() for origin in frontend_origins.split(",") if origin.strip()]
-CORS(
-    app,
-    resources={r"/api/*": {"origins": allowed_origins}},
-    supports_credentials=False,
-)
+
 
 app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
 app.config["UPLOAD_FOLDER"] = os.path.join(os.path.dirname(__file__), "..", "uploads")
