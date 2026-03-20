@@ -127,7 +127,7 @@ export const uploadResume = async (file, candidateName, codingProfiles = {}, aut
     formData.append('password', authPayload.password);
   }
 
-  const response = await fetch(`${API_BASE_URL}/candidate/upload-resume`, {
+  const response = await fetch(`${API_BASE_URL}/api/candidate/upload-resume`, {
     method: 'POST',
     headers: authPayload.token ? { Authorization: `Bearer ${authPayload.token}` } : {},
     body: formData,
