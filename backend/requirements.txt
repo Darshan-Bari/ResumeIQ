@@ -16,3 +16,4 @@ PyJWT==2.9.0
 bcrypt==4.2.1
 
 gunicorn
+supabase
