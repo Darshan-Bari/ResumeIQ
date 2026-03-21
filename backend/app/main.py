@@ -19,6 +19,10 @@ from app.matching_engine import MatchingEngine
 from app.resume_parser import ResumeParser
 from app.storage import Storage
 
+from app.supabase_client import supabase
+from app.supabase_client import upload_resume_to_supabase
+
+
 app = Flask(__name__)
 load_dotenv()
 # ✅ ADD THIS PART ↓↓↓
@@ -225,6 +229,7 @@ def _resolve_candidate_user_from_upload(parsed_data: Dict[str, Any]) -> Dict[str
 
 # ==================== AUTH ENDPOINTS ====================
 
+
 @app.route("/signup", methods=["POST"])
 @app.route("/api/signup", methods=["POST"])
 @app.route("/api/auth/signup", methods=["POST"])
@@ -242,7 +247,6 @@ def signup():
         existing = storage.get_user_by_email(email)
         if existing:
             return jsonify({"error": "User already exists. Please login."}), 409
-
         user = storage.create_user(
             {
                 "user_id": str(uuid.uuid4()),
@@ -251,6 +255,19 @@ def signup():
                 "role": data.get("role", "candidate") if data.get("role") == "admin" else "candidate",
             }
         )
+
+        # store user in supabase (safe add)
+        try:
+            supabase.table("users").insert({
+                "email": email,
+                "password_hash": _hash_password(password),
+                "role": "candidate"
+            }).execute()
+        except Exception as e:
+            print("Supabase error:", e)
+
+        
+
         return jsonify({**_build_auth_payload(user), "message": "Signup successful"}), 201
     except Exception as exc:
         return jsonify({"error": str(exc)}), 500
@@ -269,19 +286,45 @@ def login():
         if not email or not password:
             return jsonify({"error": "Email and password are required"}), 400
 
+        # 🔥 STEP 1: check local storage
         user = storage.get_user_by_email(email)
+
+        # 🔥 STEP 2: fallback to Supabase if not found
+        if not user:
+            try:
+                result = supabase.table("users").select("*").eq("email", email).execute()
+
+                if result.data:
+                    sb_user = result.data[0]
+
+                    # create user locally from supabase
+                    user = storage.create_user(
+                        {
+                            "user_id": str(uuid.uuid4()),
+                            "email": sb_user["email"],
+                            "password_hash": sb_user["password_hash"],
+                            "role": sb_user.get("role", "candidate"),
+                        }
+                    )
+            except Exception as e:
+                print("Supabase fetch error:", e)
+
+        # 🔥 STEP 3: verify password (same as before)
         if not user or not _verify_password(password, user.get("password_hash", "")):
             return jsonify({"error": "Invalid email or password"}), 401
 
+        # 🔥 STEP 4: role check
         if role and user.get("role") != role:
             return jsonify({"error": "Invalid role for this account"}), 403
 
+        # 🔥 STEP 5: update login time
         storage.update_user(user["user_id"], {"last_login_at": datetime.utcnow().isoformat()})
         refreshed = storage.get_user_by_id(user["user_id"])
+
         return jsonify({**_build_auth_payload(refreshed), "message": "Login successful"}), 200
+
     except Exception as exc:
         return jsonify({"error": str(exc)}), 500
-
 
 @app.route("/api/auth/me", methods=["GET"])
 @require_auth()
@@ -396,6 +439,16 @@ def upload_resume():
         final_filepath = os.path.join(app.config["UPLOAD_FOLDER"], final_filename)
         if os.path.abspath(temp_filepath) != os.path.abspath(final_filepath):
             os.replace(temp_filepath, final_filepath)
+
+
+        # upload to supabase storage
+        supabase_url = upload_resume_to_supabase(final_filepath, final_filename)
+
+        # use supabase url if upload success
+        if supabase_url:
+            parsed_data["resume_url"] = supabase_url
+        else:
+            parsed_data["resume_url"] = f"/api/uploads/{final_filename}"
 
         if existing_candidate and existing_candidate.get("file_path") and os.path.exists(existing_candidate["file_path"]):
             old_path = existing_candidate["file_path"]
