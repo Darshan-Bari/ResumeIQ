@@ -264,7 +264,7 @@ def signup():
                 "role": "candidate"
             }).execute()
         except Exception as e:
-            print("Supabase error:", e)
+            print("❌ SUPABASE ERROR:", str(e))
 
         
 
