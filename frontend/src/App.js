@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Briefcase, Shield, User } from 'lucide-react';
 import './styles/App.css';
 import CandidatePortal from './pages/CandidatePortal';
@@ -19,15 +19,16 @@ import {
   recruiterSignup,
   signup,
 } from './services/api';
-import CustomCursor from './components/CustomCursor';
-import GlassCard from './components/GlassCard';
+import CustomCursor from './components/CustomCursor.jsx';
+import GlassCard from './components/GlassCard.jsx';
+import Navbar from './components/Navbar.jsx';
+import Hero from './components/Hero.jsx';
+import JobsMarquee from './components/JobsMarquee.jsx';
+import BackgroundGradientStrip from './components/BackgroundGradientStrip.jsx';
+import FloatingBoxes from './components/FloatingBoxes.jsx';
 
 function App() {
   const [currentRole, setCurrentRole] = useState(null);
-  const [theme, setTheme] = useState(() => {
-    const stored = localStorage.getItem('resumeiq-theme');
-    return stored === 'dark' || stored === 'light' ? stored : 'light';
-  });
   const [authState, setAuthState] = useState(() => getAuthState());
   const [authMode, setAuthMode] = useState('login');
   const [authEmail, setAuthEmail] = useState('');
@@ -44,10 +45,8 @@ function App() {
   const [jobsError, setJobsError] = useState('');
 
   useEffect(() => {
-    document.body.classList.remove('light', 'dark');
-    document.body.classList.add(theme);
-    localStorage.setItem('resumeiq-theme', theme);
-  }, [theme]);
+    document.body.classList.add('dark');
+  }, []);
 
   useEffect(() => {
     if (currentRole !== null) {
@@ -85,12 +84,6 @@ function App() {
     };
     validateSession();
   }, [authState.token]);
-
-  const themeLabel = useMemo(() => (theme === 'light' ? 'Dark Mode' : 'Light Mode'), [theme]);
-
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
-  };
 
   const handleAuthUpdate = (token, user) => {
     setAuthState({ token, user });
@@ -165,9 +158,6 @@ function App() {
   return (
     <div className="app">
       <CustomCursor />
-      <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
-        {themeLabel}
-      </button>
       {currentRole === null ? (
         <LandingPage
           setCurrentRole={setCurrentRole}
@@ -285,148 +275,131 @@ function App() {
 }
 
 function LandingPage({ setCurrentRole, jobs, jobsLoading, jobsError }) {
+  const scrollToCards = () => {
+    const section = document.getElementById('our-approach');
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
-    <div className="landing">
-      <div className="bg-shape shape-one" aria-hidden="true"></div>
-      <div className="bg-shape shape-two" aria-hidden="true"></div>
-      <div className="bg-shape shape-three" aria-hidden="true"></div>
-      <div className="galaxy-bg" aria-hidden="true">
-        <span className="star"></span>
-        <span className="star"></span>
-        <span className="star"></span>
-        <span className="star"></span>
-        <span className="star"></span>
-      </div>
-      <div className="landing-container">
-        <div className="hero">
-          <div className="hero-content">
-            <span className="hero-kicker">AI Hiring Platform</span>
-            <h1 className="hero-title">ResumeIQ</h1>
-            <p className="hero-subtitle">AI-Powered Resume Screening & Hiring Intelligence</p>
-            <p className="hero-description">
-              Powered by AI to match the perfect candidates with the right roles
+    <div className="landing" id="home">
+      {/* Background elements (behind all content) */}
+      <div className="relative overflow-hidden min-h-screen">
+        <BackgroundGradientStrip />
+        <FloatingBoxes />
+
+        {/* Content layer */}
+        <div className="landing-container relative z-10">
+          <Navbar />
+          <Hero onScrollClick={scrollToCards} />
+          <JobsMarquee />
+
+          <section className="approach-section" id="our-approach">
+            <GlassCard title="Integrated Project Management" cardType="nodes" />
+            <GlassCard title="What Makes Us Unique" cardType="unique" />
+          </section>
+
+          <section className="impact-strip" id="impact">
+            <div className="impact-item">
+              <h3>50K+</h3>
+              <p>Resumes screened</p>
+            </div>
+            <div className="impact-item">
+              <h3>92%</h3>
+              <p>Faster screening pipeline</p>
+            </div>
+            <div className="impact-item">
+              <h3>100+</h3>
+              <p>Hiring teams onboarded</p>
+            </div>
+          </section>
+
+          <section className="role-selection" id="sectors">
+            <h2>Select Your Role</h2>
+            <p className="role-description">
+              Candidate, Recruiter, or Admin. Existing login, signup, and dashboard flows are unchanged.
             </p>
-            <div className="hero-actions">
-              <button className="btn btn-primary" onClick={() => setCurrentRole('candidate')}>
-                Register as Candidate
-              </button>
-              <button className="btn btn-secondary" onClick={() => setCurrentRole('recruiter')}>
-                Explore Recruiter Tools
-              </button>
+
+            <div className="role-cards">
+              <div className="role-card candidate-card" onClick={() => setCurrentRole('candidate')} data-interactive-card="true">
+                <div className="role-icon"><User size={34} strokeWidth={2} /></div>
+                <h3>Candidate</h3>
+                <p>Upload your resume and profile information</p>
+                <button className="role-button">I&apos;m a Candidate</button>
+              </div>
+
+              <div className="role-card recruiter-card" onClick={() => setCurrentRole('recruiter')} data-interactive-card="true">
+                <div className="role-icon"><Briefcase size={34} strokeWidth={2} /></div>
+                <h3>Recruiter</h3>
+                <p>Screen and rank candidates for your roles</p>
+                <button className="role-button">I&apos;m a Recruiter</button>
+              </div>
+
+              <div className="role-card admin-card" onClick={() => setCurrentRole('admin')} data-interactive-card="true">
+                <div className="role-icon"><Shield size={34} strokeWidth={2} /></div>
+                <h3>Admin</h3>
+                <p>Manage all jobs, candidates, and platform data</p>
+                <button className="role-button">Open Admin Panel</button>
+              </div>
             </div>
-            <div className="stats-grid">
-              <GlassCard className="stat-card">
-                <h3>100+</h3>
-                <p>Hiring teams onboarded</p>
-              </GlassCard>
-              <GlassCard className="stat-card">
-                <h3>50K+</h3>
-                <p>Resumes screened</p>
-              </GlassCard>
-              <GlassCard className="stat-card">
-                <h3>92%</h3>
-                <p>Screening time reduced</p>
-              </GlassCard>
+          </section>
+
+          <section className="jobs-section" id="projects">
+            <div className="jobs-header">
+              <h2>Recent Job Openings</h2>
+              <p>Live postings from recruiters using ResumeIQ</p>
             </div>
-          </div>
+
+            {jobsLoading && <div className="jobs-state">Loading latest jobs...</div>}
+            {!jobsLoading && jobsError && <div className="jobs-state error">{jobsError}</div>}
+            {!jobsLoading && !jobsError && jobs.length === 0 && (
+              <div className="jobs-state">No job postings yet. Check back soon.</div>
+            )}
+
+            {!jobsLoading && !jobsError && jobs.length > 0 && (
+              <div className="jobs-grid">
+                {jobs.slice(0, 8).map((job) => (
+                  <article key={job.job_id} className="job-card" data-interactive-card="true">
+                    <h3>{job.job_title || 'Untitled Role'}</h3>
+                    <div className="job-meta">
+                      <span>{job.company_name || 'Company not specified'}</span>
+                      <span>{job.location || 'Location not specified'}</span>
+                    </div>
+                    <p>{(job.job_description || '').slice(0, 140)}{(job.job_description || '').length > 140 ? '...' : ''}</p>
+                    <div className="job-skills">
+                      {(job.required_skills || []).slice(0, 6).map((skill) => (
+                        <span key={`${job.job_id}-${skill}`} className="job-skill-tag">
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="job-footer">
+                      <small>{job.created_at ? new Date(job.created_at).toLocaleDateString() : 'Date unavailable'}</small>
+                      <button className="role-button" onClick={() => setCurrentRole('candidate')}>
+                        Apply Now
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section className="people-contact" id="our-people">
+            <div className="people-panel" data-interactive-card="true">
+              <h3>Our People</h3>
+              <p>Hiring specialists, AI engineers, and product leaders collaborate on every role journey.</p>
+            </div>
+            <div className="contact-panel" id="contact-us" data-interactive-card="true">
+              <h3>Contact Us</h3>
+              <p>Ready to modernize hiring outcomes with AI assistance?</p>
+              <button className="role-button" onClick={() => setCurrentRole('recruiter')}>Let&apos;s Collaborate</button>
+            </div>
+          </section>
+
+          <footer className="landing-footer">Website made by Darshan Bari</footer>
         </div>
-
-        <div className="role-selection">
-          <h2>Select Your Role</h2>
-          <p className="role-description">
-            Choose whether you're a candidate looking to apply or a recruiter screening resumes
-          </p>
-          
-          <div className="role-cards">
-            <div className="role-card candidate-card" onClick={() => setCurrentRole('candidate')}>
-              <div className="role-icon"><User size={42} strokeWidth={2} /></div>
-              <h3>Candidate</h3>
-              <p>Upload your resume and profile information</p>
-              <button className="role-button">I'm a Candidate</button>
-            </div>
-
-            <div className="role-card recruiter-card" onClick={() => setCurrentRole('recruiter')}>
-              <div className="role-icon"><Briefcase size={42} strokeWidth={2} /></div>
-              <h3>Recruiter</h3>
-              <p>Screen and rank candidates for your roles</p>
-              <button className="role-button">I'm a Recruiter</button>
-            </div>
-
-            <div className="role-card recruiter-card" onClick={() => setCurrentRole('admin')}>
-              <div className="role-icon"><Shield size={42} strokeWidth={2} /></div>
-              <h3>Admin</h3>
-              <p>Manage all jobs, candidates, and platform data</p>
-              <button className="role-button">Open Admin Panel</button>
-            </div>
-          </div>
-        </div>
-
-        <div className="features">
-          <h2>Why Choose ResumeIQ?</h2>
-          <div className="features-grid">
-            <div className="feature">
-              <div className="feature-icon">🚀</div>
-              <h4>Instant AI Matching</h4>
-              <p>AI-powered resume screening in seconds</p>
-            </div>
-            <div className="feature">
-              <div className="feature-icon">🎯</div>
-              <h4>Skill Gap Analysis</h4>
-              <p>Identify matched and missing skills instantly</p>
-            </div>
-            <div className="feature">
-              <div className="feature-icon">📊</div>
-              <h4>Detailed Rankings</h4>
-              <p>Candidates ranked by relevance score</p>
-            </div>
-            <div className="feature">
-              <div className="feature-icon">🔗</div>
-              <h4>Profile Links</h4>
-              <p>Connect LeetCode, GitHub, and more</p>
-            </div>
-          </div>
-        </div>
-
-        <section className="jobs-section">
-          <div className="jobs-header">
-            <h2>Open Roles</h2>
-            <p>Live job postings from recruiters using ResumeIQ</p>
-          </div>
-
-          {jobsLoading && <div className="jobs-state">Loading latest jobs...</div>}
-          {!jobsLoading && jobsError && <div className="jobs-state error">{jobsError}</div>}
-          {!jobsLoading && !jobsError && jobs.length === 0 && (
-            <div className="jobs-state">No job postings yet. Check back soon.</div>
-          )}
-
-          {!jobsLoading && !jobsError && jobs.length > 0 && (
-            <div className="jobs-grid">
-              {jobs.slice(0, 8).map((job) => (
-                <article key={job.job_id} className="job-card">
-                  <h3>{job.job_title || 'Untitled Role'}</h3>
-                  <div className="job-meta">
-                    <span>{job.company_name || 'Company not specified'}</span>
-                    <span>{job.location || 'Location not specified'}</span>
-                  </div>
-                  <p>{(job.job_description || '').slice(0, 140)}{(job.job_description || '').length > 140 ? '...' : ''}</p>
-                  <div className="job-skills">
-                    {(job.required_skills || []).slice(0, 6).map((skill) => (
-                      <span key={`${job.job_id}-${skill}`} className="job-skill-tag">
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="job-footer">
-                    <small>{job.created_at ? new Date(job.created_at).toLocaleDateString() : 'Date unavailable'}</small>
-                    <button className="role-button" onClick={() => setCurrentRole('candidate')}>
-                      Apply Now
-                    </button>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
       </div>
     </div>
   );
