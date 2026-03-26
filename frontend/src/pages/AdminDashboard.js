@@ -47,7 +47,7 @@ function AdminDashboard({ token, onLogout, setCurrentRole }) {
 
   useEffect(() => {
     loadAdminData();
-  }, [token]);
+  }, [loadAdminData]);
 
   const handleDeleteCandidate = async (candidateId) => {
     if (!window.confirm('Delete this candidate account and resume?')) {
