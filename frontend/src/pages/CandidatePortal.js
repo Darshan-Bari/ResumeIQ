@@ -51,7 +51,7 @@ function CandidatePortal({ setCurrentRole, authState, onAuthUpdate, onLogout }) 
   });
   const fileInputRef = useRef(null);
 
-  const hydrateProfile = (candidateData) => {
+  const hydrateProfile = useCallback((candidateData) => {
     if (!candidateData) {
       return;
     }
@@ -79,7 +79,7 @@ function CandidatePortal({ setCurrentRole, authState, onAuthUpdate, onLogout }) 
       codeforces: candidateData.coding_profiles?.codeforces || '',
       codechef: candidateData.coding_profiles?.codechef || '',
     });
-  };
+  }, [authState]);
 
   const loadDashboardData = useCallback(async () => {
     if (!authState?.token) {
@@ -112,7 +112,7 @@ function CandidatePortal({ setCurrentRole, authState, onAuthUpdate, onLogout }) 
     } finally {
       setLoading(false);
     }
-  }, [authState?.token]);
+  }, [authState?.token, hydrateProfile]);
 
   useEffect(() => {
     loadDashboardData();
