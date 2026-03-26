@@ -3,9 +3,9 @@
  * Handles all backend API calls and auth token persistence.
  */
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
-// const API_BASE_URL = "http://127.0.0.1:5000";
-console.log("API_BASE_URL:", API_BASE_URL);
+const RAW_API_BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:5000';
+const API_BASE_URL = RAW_API_BASE_URL.replace(/\/$/, '').replace(/\/api$/, '');
+console.log('API_BASE_URL:', API_BASE_URL);
 const TOKEN_KEY = 'resumeiq-token';
 const USER_KEY = 'resumeiq-user';
 
@@ -29,10 +29,16 @@ const buildHeaders = (token, hasJsonBody = true) => {
 };
 
 const request = async (path, options = {}) => {
-  const response = await fetch(`${API_BASE_URL}${path}`, options);
+  let response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, options);
+  } catch {
+    throw new Error('Unable to reach backend API. Please ensure backend is running.');
+  }
+
   const body = await parseJsonSafe(response);
   if (!response.ok) {
-    throw new Error(body.error || 'Request failed');
+    throw new Error(body.message || body.error || 'Request failed');
   }
   return body;
 };
@@ -200,6 +206,18 @@ export const createJob = async (jobData, token = '') => {
 
 export const getJobs = async () => {
   return await request('/api/recruiter/jobs', { method: 'GET' });
+};
+
+export const getRecentJobs = async () => {
+  return await request('/api/jobs/recent', { method: 'GET' });
+};
+
+export const applyToRecentJob = async (jobId, userId, token = '') => {
+  return await request(`/api/jobs/${jobId}/apply`, {
+    method: 'POST',
+    headers: buildHeaders(token, true),
+    body: JSON.stringify({ userId }),
+  });
 };
 
 export const matchCandidates = async (jobId, candidateIds = null, jobData = null) => {

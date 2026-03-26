@@ -67,6 +67,75 @@
   width: 100%;
 }
 
+.dashboard-container {
+  width: 100%;
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.left-section {
+  flex: 2;
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.right-section {
+  flex: 1;
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.profile-summary-card {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(241, 245, 249, 0.88));
+}
+
+.profile-summary-grid p {
+  margin: 0;
+}
+
+.summary-subsection {
+  margin-top: var(--space-md);
+}
+
+.summary-subsection h3 {
+  margin: 0 0 var(--space-sm);
+  font-size: 1.05rem;
+}
+
+.summary-lines {
+  display: grid;
+  gap: 6px;
+}
+
+.summary-lines p {
+  margin: 0;
+  color: var(--text-light);
+  font-size: 0.95rem;
+}
+
+.inline-muted {
+  margin: 0;
+  color: var(--text-light);
+  font-size: 0.94rem;
+}
+
+.job-list {
+  margin-top: var(--space-sm);
+}
+
+.match-score-box {
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(0, 255, 150, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+}
+
+.match-score-box p {
+  margin: 6px 0;
+}
+
 .section-header-row {
   display: flex;
   justify-content: space-between;
@@ -382,6 +451,24 @@
 
 .auth-card {
   border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+@media (max-width: 1024px) {
+  .dashboard-container {
+    flex-direction: column;
+  }
+
+  .left-section,
+  .right-section {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    flex-direction: column;
+    gap: var(--space-md);
+  }
 }
 
 /* Success Screen */
