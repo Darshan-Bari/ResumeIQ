@@ -41,6 +41,7 @@ function CandidatePortal({ setCurrentRole, authState, onAuthUpdate, onLogout }) 
 
   const [skillInput, setSkillInput] = useState('');
   const [resumeFile, setResumeFile] = useState(null);
+  const [jobMatchResult, setJobMatchResult] = useState(null);
   const [resumeCandidateName, setResumeCandidateName] = useState('');
   const [uploadLinks, setUploadLinks] = useState({
     github: '',
@@ -240,7 +241,14 @@ function CandidatePortal({ setCurrentRole, authState, onAuthUpdate, onLogout }) 
     setLoading(true);
     setMessage('');
     try {
-      await applyToJob(jobId, authState?.token);
+      const response = await applyToJob(jobId, authState?.token);
+      const targetJob = jobListings.find((job) => job.job_id === jobId);
+      setJobMatchResult({
+        jobTitle: targetJob?.job_title || response?.job?.job_title || 'Selected Job',
+        score: Number(response?.match_score || 0),
+        matchedSkills: Array.isArray(response?.matched_skills) ? response.matched_skills : [],
+        missingSkills: Array.isArray(response?.missing_skills) ? response.missing_skills : [],
+      });
       setMessage('Applied successfully');
       await loadDashboardData();
     } catch (error) {
@@ -295,106 +303,173 @@ function CandidatePortal({ setCurrentRole, authState, onAuthUpdate, onLogout }) 
 
         {viewMode === 'dashboard' && (
           <>
-            <section className="portal-card dashboard-section">
-              <div className="section-header-row">
-                <h2>Profile</h2>
-                <button className="btn btn-secondary" onClick={() => setViewMode('edit-profile')}>
-                  Edit Profile
-                </button>
-              </div>
-              {candidate ? (
-                <div className="profile-grid">
-                  <p><strong>Name:</strong> {candidate.candidate_name || 'N/A'}</p>
-                  <p><strong>Email:</strong> {candidate.contact?.email || 'N/A'}</p>
-                  <p><strong>Phone:</strong> {candidate.contact?.phone || 'N/A'}</p>
-                  <p><strong>Skills:</strong> {(candidate.skills || []).join(', ') || 'N/A'}</p>
-                </div>
-              ) : (
-                <p>Complete your profile to start applying.</p>
-              )}
-            </section>
+            <section className="dashboard-container">
+              <div className="left-section">
+                <section className="portal-card dashboard-section profile-summary-card">
+                  <div className="section-header-row">
+                    <h2>Profile Summary</h2>
+                    <button className="btn btn-secondary" onClick={() => setViewMode('edit-profile')}>
+                      Edit Profile
+                    </button>
+                  </div>
 
-            <section className="portal-card dashboard-section">
-              <div className="section-header-row">
-                <h2>Resume</h2>
-                <button className="btn btn-secondary" onClick={() => setViewMode('update-resume')}>
-                  Update Resume
-                </button>
-              </div>
-              {candidate?.resume_file_name ? (
-                <div className="resume-info-box">
-                  <p><strong>File:</strong> {candidate.resume_file_name}</p>
-                  <p><strong>Last Updated:</strong> {candidate.updated_at ? new Date(candidate.updated_at).toLocaleString() : 'N/A'}</p>
-                  <p>
-                    <strong>View:</strong>{' '}
-                    <a href={`${API_BASE}${candidate.resume_url || ''}`} target="_blank" rel="noopener noreferrer">
-                      Open Resume
-                    </a>
-                  </p>
-                </div>
-              ) : (
-                <p>No resume uploaded yet.</p>
-              )}
-            </section>
+                  {candidate ? (
+                    <>
+                      <div className="profile-grid profile-summary-grid">
+                        <p><strong>Name:</strong> {candidate.candidate_name || 'N/A'}</p>
+                        <p><strong>Email:</strong> {candidate.contact?.email || 'N/A'}</p>
+                        <p><strong>Phone:</strong> {candidate.contact?.phone || 'N/A'}</p>
+                      </div>
 
-            <section className="portal-card dashboard-section">
-              <h2>Applied Jobs</h2>
-              {appliedJobs.length === 0 ? (
-                <p>You have not applied to any jobs yet.</p>
-              ) : (
-                <div className="results-list">
-                  {appliedJobs.map((item) => (
-                    <article className="result-card" key={item.application_id || `${item.job?.job_id}-${item.applied_at}`}>
-                      <div className="result-header">
-                        <div className="candidate-header-info">
-                          <h3>{item.job?.job_title || 'Untitled role'}</h3>
-                          <p className="candidate-email">{item.job?.company_name || 'Company not specified'}</p>
+                      <div className="summary-subsection">
+                        <h3>Skills</h3>
+                        <div className="skills-list">
+                          {(candidate.skills || []).length > 0 ? (
+                            (candidate.skills || []).slice(0, 12).map((skill) => (
+                              <span key={skill} className="skill-tag">{skill}</span>
+                            ))
+                          ) : (
+                            <p className="inline-muted">No skills parsed yet.</p>
+                          )}
                         </div>
-                        <div className="score-display">
-                          <div className="overall-score">
-                            <span className="score-value">{Number(item.match_score || 0).toFixed(2)}%</span>
-                            <span className="score-label">Match</span>
+                      </div>
+
+                      <div className="summary-subsection">
+                        <h3>Education</h3>
+                        {(candidate.education || []).length > 0 ? (
+                          <div className="summary-lines">
+                            {(candidate.education || []).slice(0, 3).map((edu, idx) => (
+                              <p key={`edu-summary-${idx}`}>
+                                {(edu.degree || edu.raw_line || '').trim() || 'Education entry'}
+                                {edu.year ? ` • ${edu.year}` : ''}
+                              </p>
+                            ))}
                           </div>
-                          {renderStatusBadge(item.status)}
-                        </div>
+                        ) : (
+                          <p className="inline-muted">No education data available.</p>
+                        )}
                       </div>
-                    </article>
-                  ))}
-                </div>
-              )}
-            </section>
 
-            <section className="portal-card dashboard-section">
-              <h2>New Job Listings</h2>
-              {jobListings.length === 0 ? (
-                <p>No job listings available.</p>
-              ) : (
-                <div className="results-list">
-                  {jobListings.map((job) => (
-                    <article className="result-card" key={job.job_id}>
-                      <div className="result-header">
-                        <div className="candidate-header-info">
-                          <h3>{job.job_title || 'Untitled role'}</h3>
-                          <p className="candidate-email">{job.company_name || 'Company not specified'}</p>
-                        </div>
-                        <button
-                          className="btn btn-primary"
-                          disabled={loading || job.is_applied}
-                          onClick={() => handleApply(job.job_id)}
-                        >
-                          {job.is_applied ? 'Applied' : 'Apply'}
-                        </button>
+                      <div className="summary-subsection">
+                        <h3>Experience</h3>
+                        {(candidate.experience || []).length > 0 ? (
+                          <div className="summary-lines">
+                            {(candidate.experience || []).slice(0, 3).map((exp, idx) => (
+                              <p key={`exp-summary-${idx}`}>
+                                {(exp.role || exp.raw_line || '').trim() || 'Experience entry'}
+                                {exp.company ? ` @ ${exp.company}` : ''}
+                                {exp.duration ? ` (${exp.duration})` : ''}
+                              </p>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="inline-muted">No experience data available.</p>
+                        )}
                       </div>
-                      <p>{(job.job_description || '').slice(0, 220)}{(job.job_description || '').length > 220 ? '...' : ''}</p>
-                      <div className="skills-list">
-                        {(job.required_skills || []).slice(0, 8).map((skill) => (
-                          <span key={`${job.job_id}-${skill}`} className="skill-tag">{skill}</span>
-                        ))}
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              )}
+                    </>
+                  ) : (
+                    <p>Complete your profile to start applying.</p>
+                  )}
+                </section>
+
+                <section className="portal-card dashboard-section">
+                  <div className="section-header-row">
+                    <h2>Resume</h2>
+                    <button className="btn btn-secondary" onClick={() => setViewMode('update-resume')}>
+                      Update Resume
+                    </button>
+                  </div>
+                  {candidate?.resume_file_name ? (
+                    <div className="resume-info-box">
+                      <p><strong>File:</strong> {candidate.resume_file_name}</p>
+                      <p><strong>Last Updated:</strong> {candidate.updated_at ? new Date(candidate.updated_at).toLocaleString() : 'N/A'}</p>
+                      <p>
+                        <strong>View:</strong>{' '}
+                        <a href={`${API_BASE}${candidate.resume_url || ''}`} target="_blank" rel="noopener noreferrer">
+                          Open Resume
+                        </a>
+                      </p>
+                    </div>
+                  ) : (
+                    <p>No resume uploaded yet.</p>
+                  )}
+                </section>
+
+                <section className="portal-card dashboard-section">
+                  <h2>Applied Jobs</h2>
+                  {appliedJobs.length === 0 ? (
+                    <p>You have not applied to any jobs yet.</p>
+                  ) : (
+                    <div className="results-list">
+                      {appliedJobs.map((item) => (
+                        <article className="result-card" key={item.application_id || `${item.job?.job_id}-${item.applied_at}`}>
+                          <div className="result-header">
+                            <div className="candidate-header-info">
+                              <h3>{item.job?.job_title || 'Untitled role'}</h3>
+                              <p className="candidate-email">{item.job?.company_name || 'Company not specified'}</p>
+                            </div>
+                            <div className="score-display">
+                              <div className="overall-score">
+                                <span className="score-value">{Number(item.match_score || 0).toFixed(2)}%</span>
+                                <span className="score-label">Match</span>
+                              </div>
+                              {renderStatusBadge(item.status)}
+                            </div>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  )}
+                </section>
+              </div>
+
+              <div className="right-section">
+                <section className="portal-card dashboard-section">
+                  <h2>Recent Job Openings</h2>
+                  {jobListings.length === 0 ? (
+                    <p>No job listings available.</p>
+                  ) : (
+                    <div className="results-list job-list">
+                      {jobListings.map((job) => (
+                        <article className="result-card" key={job.job_id}>
+                          <div className="result-header">
+                            <div className="candidate-header-info">
+                              <h3>{job.job_title || 'Untitled role'}</h3>
+                              <p className="candidate-email">{job.company_name || 'Company not specified'}</p>
+                            </div>
+                            <button
+                              className="btn btn-primary"
+                              disabled={loading || job.is_applied}
+                              onClick={() => handleApply(job.job_id)}
+                            >
+                              {job.is_applied ? 'Applied' : 'Apply'}
+                            </button>
+                          </div>
+                          <p>{(job.job_description || '').slice(0, 150)}{(job.job_description || '').length > 150 ? '...' : ''}</p>
+                          <div className="skills-list">
+                            {(job.required_skills || []).slice(0, 6).map((skill) => (
+                              <span key={`${job.job_id}-${skill}`} className="skill-tag">{skill}</span>
+                            ))}
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  )}
+
+                  {jobMatchResult ? (
+                    <div className="match-score-box" role="status">
+                      <p><strong>Last Applied Role:</strong> {jobMatchResult.jobTitle}</p>
+                      <p><strong>Match Score:</strong> {jobMatchResult.score.toFixed(2)}%</p>
+                      {jobMatchResult.matchedSkills.length > 0 ? (
+                        <p><strong>Matched Skills:</strong> {jobMatchResult.matchedSkills.join(', ')}</p>
+                      ) : null}
+                      {jobMatchResult.missingSkills.length > 0 ? (
+                        <p><strong>Skills to Improve:</strong> {jobMatchResult.missingSkills.join(', ')}</p>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </section>
+              </div>
             </section>
           </>
         )}

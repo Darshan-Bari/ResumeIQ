@@ -1,15 +1,10 @@
 """Resume parser with practical heuristic extraction for hackathon use."""
 
+import os
 import re
 from typing import Any, Dict, List
 
-import PyPDF2
-import pdfplumber
-
-try:
-    import fitz  # PyMuPDF
-except Exception:
-    fitz = None
+import pymupdf4llm
 
 
 class ResumeParser:
@@ -19,53 +14,54 @@ class ResumeParser:
         pass
     
     def extract_text_from_pdf(self, pdf_path: str) -> str:
-        """
-        Extract text from PDF using multiple methods
-        
-        Args:
-            pdf_path: Path to the PDF file
-            
-        Returns:
-            Extracted text from the PDF
-        """
-        text = ""
-        
-        # Try pdfplumber first (more reliable)
-        try:
-            with pdfplumber.open(pdf_path) as pdf:
-                for page in pdf.pages:
-                    text += page.extract_text() or ""
-            if text.strip():
-                return text
-        except Exception as e:
-            print(f"pdfplumber extraction failed: {e}")
-        
-        # Fallback to PyPDF2
-        try:
-            with open(pdf_path, 'rb') as file:
-                pdf_reader = PyPDF2.PdfReader(file)
-                for page in pdf_reader.pages:
-                    text += page.extract_text() or ""
-            if text.strip():
-                return text
-        except Exception as e:
-            print(f"PyPDF2 extraction failed: {e}")
+        """Extract structured markdown text from a PDF using PyMuPDF4LLM."""
+        if not pdf_path or not os.path.isfile(pdf_path):
+            raise ValueError("PDF file not found")
+        if not pdf_path.lower().endswith(".pdf"):
+            raise ValueError("Only PDF files are supported")
+        if os.path.getsize(pdf_path) == 0:
+            raise ValueError("Uploaded PDF is empty")
 
-        # Final fallback to PyMuPDF when available
-        if fitz is not None:
-            try:
-                doc = fitz.open(pdf_path)
-                for page in doc:
-                    text += page.get_text() or ""
-                doc.close()
-            except Exception as e:
-                print(f"PyMuPDF extraction failed: {e}")
-        
+        try:
+            markdown_text = pymupdf4llm.to_markdown(pdf_path)
+        except Exception as exc:
+            raise ValueError(f"Unable to parse PDF with PyMuPDF4LLM: {exc}") from exc
+
+        text = re.sub(r"\n{3,}", "\n\n", markdown_text or "").strip()
+        if not text:
+            raise ValueError("No readable content found in PDF")
         return text
+
+    @staticmethod
+    def _section_text(text: str, keys: List[str]) -> str:
+        """Extract content under markdown-like section headings."""
+        lines = text.splitlines()
+        result: List[str] = []
+        active = False
+
+        for raw_line in lines:
+            line = raw_line.strip()
+            if not line:
+                if active:
+                    result.append("")
+                continue
+
+            normalized = line.lower().lstrip("#").strip(" :-")
+            if line.startswith("#"):
+                if any(key in normalized for key in keys):
+                    active = True
+                    continue
+                if active:
+                    break
+
+            if active:
+                result.append(line)
+
+        return "\n".join(result).strip()
 
     def extract_name(self, text: str, fallback_name: str = "") -> str:
         """Extract likely candidate name from first non-empty lines."""
-        lines = [line.strip() for line in text.splitlines() if line.strip()]
+        lines = [line.strip().lstrip("#").strip() for line in text.splitlines() if line.strip()]
         for line in lines[:6]:
             if "@" in line or any(char.isdigit() for char in line):
                 continue
@@ -130,72 +126,86 @@ class ResumeParser:
         return sorted(list(found_skills))
     
     def extract_education(self, text: str) -> List[Dict[str, str]]:
-        """
-        Extract education information
-        
-        Args:
-            text: Resume text
-            
-        Returns:
-            List of education entries
-        """
-        education = []
-        
-        # Common degree patterns
-        degree_patterns = {
-            'B.Tech': r"(?:B\.Tech|B\.E\.|Bachelor of Technology|Bachelor of Engineering)",
-            'B.Sc': r"(?:B\.Sc|Bachelor of Science)",
-            'B.A': r"(?:B\.A|Bachelor of Arts)",
-            'M.Tech': r"(?:M\.Tech|Master of Technology)",
-            'M.S': r"(?:M\.S|Master of Science)",
-            'MBA': r"(?:MBA|Master of Business Administration)",
-            'M.Sc': r"(?:M\.Sc|Master of Science)",
-            'PhD': r"(?:PhD|Ph\.D|Doctor of Philosophy)",
-            'BE': r"(?:BE|B\.E(?!\.))",
-            '12th': r"(?:12th|XII|Higher Secondary)",
-            '10th': r"(?:10th|X|Secondary School)",
-        }
-        
-        text_lines = text.split("\n")
-        for i, line in enumerate(text_lines):
-            _ = i
-            for degree_name, pattern in degree_patterns.items():
-                if re.search(pattern, line, re.IGNORECASE):
-                    education.append({
-                        'degree': degree_name,
-                        'raw_line': line.strip()
-                    })
-        
-        return education
+        """Extract education entries with degree, college and year when possible."""
+        education: List[Dict[str, str]] = []
+        source = self._section_text(text, ["education", "academic"]) or text
+        lines = [line.strip("- *") for line in source.splitlines() if line.strip()]
+
+        degree_regex = re.compile(
+            r"(b\.?(tech|e|sc|a|com)|m\.?(tech|e|sc|a)|mba|ph\.?d|bachelor|master|diploma)",
+            re.IGNORECASE,
+        )
+        year_regex = re.compile(r"(?:19|20)\d{2}")
+
+        for line in lines:
+            if len(line) < 4:
+                continue
+            if not degree_regex.search(line):
+                continue
+
+            years = year_regex.findall(line)
+            year_match = re.search(r"((?:19|20)\d{2}(?:\s*[-–]\s*(?:19|20)\d{2}|\s*[-–]\s*present)?)", line, re.IGNORECASE)
+
+            college_match = re.search(
+                r"([A-Z][A-Za-z&.,\-\s]*(?:University|College|Institute|School))",
+                line,
+            )
+
+            degree_match = degree_regex.search(line)
+            education.append(
+                {
+                    "degree": degree_match.group(0) if degree_match else "",
+                    "college": college_match.group(1).strip() if college_match else "",
+                    "year": year_match.group(1).strip() if year_match else (years[0] if years else ""),
+                    "raw_line": line,
+                }
+            )
+
+        return education[:8]
     
     def extract_experience(self, text: str) -> List[Dict[str, str]]:
-        """
-        Extract work experience information
-        
-        Args:
-            text: Resume text
-            
-        Returns:
-            List of experience entries
-        """
-        experience = []
-        
-        # Common experience patterns
-        experience_keywords = [
-            'experience', 'worked', 'role', 'position', 'responsible',
-            'developed', 'designed', 'implemented', 'led', 'managed'
-        ]
-        
-        text_lines = text.split('\n')
-        
-        # Look for company names, job titles, and descriptions
-        for i, line in enumerate(text_lines):
-            # Check for lines that might contain job titles or companies
-            if any(keyword in line.lower() for keyword in experience_keywords):
-                if line.strip():
-                    experience.append({'role': line.strip()})
-        
-        return experience[:5]  # Return top 5 experiences
+        """Extract work entries with role, company and duration heuristically."""
+        entries: List[Dict[str, str]] = []
+        source = self._section_text(text, ["experience", "work experience", "employment"]) or text
+        lines = [line.strip("- *") for line in source.splitlines() if line.strip()]
+
+        duration_regex = re.compile(
+            r"((?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)?\s*(?:19|20)\d{2}\s*[-–]\s*(?:present|current|(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)?\s*(?:19|20)\d{2}))",
+            re.IGNORECASE,
+        )
+
+        for line in lines:
+            duration_match = duration_regex.search(line)
+            role = ""
+            company = ""
+
+            if " at " in line.lower():
+                parts = re.split(r"\s+at\s+", line, flags=re.IGNORECASE)
+                role = parts[0].strip(" -|")
+                company = parts[1].strip(" -|") if len(parts) > 1 else ""
+            elif "|" in line:
+                parts = [part.strip() for part in line.split("|") if part.strip()]
+                if parts:
+                    role = parts[0]
+                if len(parts) > 1:
+                    company = parts[1]
+            else:
+                role = line
+
+            if duration_match:
+                company = company.replace(duration_match.group(1), "").strip(" -,")
+
+            if role or company or duration_match:
+                entries.append(
+                    {
+                        "role": role,
+                        "company": company,
+                        "duration": duration_match.group(1).strip() if duration_match else "",
+                        "raw_line": line,
+                    }
+                )
+
+        return entries[:8]
 
     def extract_projects(self, text: str) -> List[Dict[str, str]]:
         """Extract project bullet points from project section heuristically."""
@@ -302,8 +312,24 @@ class ResumeParser:
         Returns:
             Structured resume data
         """
-        # Extract text
-        text = self.extract_text_from_pdf(pdf_path)
+        try:
+            text = self.extract_text_from_pdf(pdf_path)
+        except ValueError as exc:
+            return {
+                "error": str(exc),
+                "skills": [],
+                "education": [],
+                "experience": [],
+                "contact": {},
+            }
+        except Exception:
+            return {
+                "error": "Unexpected resume parsing error",
+                "skills": [],
+                "education": [],
+                "experience": [],
+                "contact": {},
+            }
         
         if not text.strip():
             return {
@@ -325,9 +351,12 @@ class ResumeParser:
         estimated_experience_years = self.estimate_experience_years(text, experience)
         
         # Clean skill text (lowercase and remove duplicates)
-        skills = list(set([s.lower().strip() for s in skills]))
+        skills = sorted(list(set([s.lower().strip() for s in skills if s and s.strip()])))
         
         return {
+            'name': inferred_name,
+            'email': contact.get('email', ''),
+            'phone': contact.get('phone', ''),
             'candidate_name': inferred_name,
             'skills': skills,
             'education': education,

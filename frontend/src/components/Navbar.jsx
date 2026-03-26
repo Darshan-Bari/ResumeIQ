@@ -1,23 +1,24 @@
 import React from 'react';
 
-const MENU_ITEMS = [
-  { label: 'Home', href: '#home' },
-  { label: 'Our Approach', href: '#our-approach' },
-  { label: 'Our People', href: '#our-people' },
-  { label: 'Contact Us', href: '#contact-us' },
-];
-
-function Navbar() {
+function Navbar({ onHome, onFeatures, onDashboard, onLogin, onRecruiterLogin, onSignup }) {
   return (
-    <header className="top-navbar" data-interactive-card="true">
-      <div className="nav-logo" aria-label="ResumeIQ logo">R</div>
-      <nav className="nav-menu" aria-label="Primary navigation">
-        {MENU_ITEMS.map((item) => (
-          <a key={item.label} href={item.href} className="nav-link">
-            {item.label}
-          </a>
-        ))}
+    <header className="landing-navbar" data-interactive-card="true">
+      <div className="brand-wrap" aria-label="ResumeIQ logo and title">
+        <div className="brand-mark">R</div>
+        <h2>Resume<span>IQ</span></h2>
+      </div>
+
+      <nav className="landing-nav-links" aria-label="Primary navigation">
+        <button type="button" onClick={onHome}>Home</button>
+        <button type="button" onClick={onFeatures}>Features</button>
+        <button type="button" onClick={onDashboard}>Dashboard</button>
+        <button type="button" onClick={onLogin}>Login</button>
+        <button type="button" className="recruiter-btn" onClick={onRecruiterLogin}>Recruiter Login</button>
       </nav>
+
+      <button type="button" className="btn-gradient nav-signup-btn" onClick={onSignup}>
+        Sign Up
+      </button>
     </header>
   );
 }

@@ -2,6 +2,7 @@
 
 import os
 import secrets
+import sys
 import uuid
 from datetime import datetime, timedelta, timezone
 from functools import wraps
@@ -23,13 +24,25 @@ from app.supabase_client import supabase
 from app.supabase_client import upload_resume_to_supabase
 
 
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
+except Exception:
+    # Some runtimes do not expose reconfigure on std streams.
+    pass
+
+
 app = Flask(__name__)
 load_dotenv()
 # ✅ ADD THIS PART ↓↓↓
 
 CORS(
     app,
-    resources={r"/api/*": {"origins": "*"}},
+    resources={
+        r"/api/*": {"origins": "*"},
+        r"/login": {"origins": "*"},
+        r"/signup": {"origins": "*"},
+    },
     supports_credentials=False
 )
 
@@ -54,6 +67,8 @@ app.config["DATA_FOLDER"] = os.path.join(os.path.dirname(__file__), "..", "data"
 app.config["JWT_SECRET"] = os.getenv("JWT_SECRET", "resumeiq-dev-secret-change-me")
 app.config["JWT_ALGORITHM"] = "HS256"
 app.config["JWT_EXPIRY_HOURS"] = int(os.getenv("JWT_EXPIRY_HOURS", "24"))
+app.config["JSON_AS_ASCII"] = False
+app.json.ensure_ascii = False
 
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 os.makedirs(app.config["DATA_FOLDER"], exist_ok=True)
@@ -63,6 +78,53 @@ ALLOWED_EXTENSIONS = {"pdf"}
 parser = ResumeParser()
 matcher = MatchingEngine()
 storage = Storage(os.path.join(app.config["DATA_FOLDER"], "resumeiq.db"))
+
+
+def clean_text(text: Any) -> str:
+    if text is None:
+        return ""
+    return str(text).encode("utf-8", errors="ignore").decode("utf-8")
+
+
+def clean_payload(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {clean_text(key): clean_payload(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [clean_payload(item) for item in value]
+    if isinstance(value, tuple):
+        return [clean_payload(item) for item in value]
+    if isinstance(value, str):
+        return clean_text(value)
+    return value
+
+
+def calculate_match_score(job_skills: Any, candidate_skills: Any) -> Dict[str, Any]:
+    if not job_skills:
+        return {
+            "score": 0,
+            "matched": [],
+            "missing": [],
+        }
+
+    job_set = {str(skill).lower().strip() for skill in (job_skills or []) if str(skill).strip()}
+    candidate_set = {str(skill).lower().strip() for skill in (candidate_skills or []) if str(skill).strip()}
+
+    if not job_set:
+        return {
+            "score": 0,
+            "matched": [],
+            "missing": [],
+        }
+
+    matched = sorted(list(job_set.intersection(candidate_set)))
+    missing = sorted(list(job_set - candidate_set))
+    score = (len(matched) / len(job_set)) * 100
+
+    return {
+        "score": round(score, 2),
+        "matched": matched,
+        "missing": missing,
+    }
 
 
 def _ensure_default_admin() -> None:
@@ -240,13 +302,13 @@ def signup():
         password = (data.get("password") or "").strip()
 
         if not email or not password:
-            return jsonify({"error": "Email and password are required"}), 400
+            return jsonify({"success": False, "message": "Email and password are required", "error": "Email and password are required"}), 400
         if len(password) < 6:
-            return jsonify({"error": "Password must be at least 6 characters"}), 400
+            return jsonify({"success": False, "message": "Password must be at least 6 characters", "error": "Password must be at least 6 characters"}), 400
 
         existing = storage.get_user_by_email(email)
         if existing:
-            return jsonify({"error": "User already exists. Please login."}), 409
+            return jsonify({"success": False, "message": "User already exists. Please login.", "error": "User already exists. Please login."}), 409
         user = storage.create_user(
             {
                 "user_id": str(uuid.uuid4()),
@@ -259,19 +321,26 @@ def signup():
         # store user in supabase (safe add)
         try:
             supabase.table("users").insert({
-                "email": email,
-                "password_hash": _hash_password(password),
-                "role": "candidate"
+                "email": clean_text(email),
+                "password_hash": clean_text(_hash_password(password)),
+                "role": clean_text("candidate")
             }).execute()
         except Exception as e:
-            print("❌ SUPABASE ERROR:", str(e))
+            app.logger.warning("Supabase user insert failed: %s", clean_text(str(e)))
 
-        
+        return jsonify({
+            "success": True,
+            **_build_auth_payload(user),
+            "message": "Signup successful"
+        }), 201
 
-        return jsonify({**_build_auth_payload(user), "message": "Signup successful"}), 201
     except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
-
+        app.logger.exception("Signup error")
+        return jsonify({
+            "success": False,
+            "message": "Signup failed",
+            "error": "Signup failed"
+        }), 500
 
 @app.route("/login", methods=["POST"])
 @app.route("/api/login", methods=["POST"])
@@ -284,7 +353,7 @@ def login():
         role = data.get("role")
 
         if not email or not password:
-            return jsonify({"error": "Email and password are required"}), 400
+            return jsonify({"success": False, "message": "Email and password are required", "error": "Email and password are required"}), 400
 
         # 🔥 STEP 1: check local storage
         user = storage.get_user_by_email(email)
@@ -306,25 +375,26 @@ def login():
                             "role": sb_user.get("role", "candidate"),
                         }
                     )
-            except Exception as e:
-                print("Supabase fetch error:", e)
+            except Exception:
+                app.logger.exception("Supabase fetch error during login")
 
         # 🔥 STEP 3: verify password (same as before)
         if not user or not _verify_password(password, user.get("password_hash", "")):
-            return jsonify({"error": "Invalid email or password"}), 401
+            return jsonify({"success": False, "message": "Invalid credentials", "error": "Invalid email or password"}), 401
 
         # 🔥 STEP 4: role check
         if role and user.get("role") != role:
-            return jsonify({"error": "Invalid role for this account"}), 403
+            return jsonify({"success": False, "message": "Invalid role for this account", "error": "Invalid role for this account"}), 403
 
         # 🔥 STEP 5: update login time
         storage.update_user(user["user_id"], {"last_login_at": datetime.utcnow().isoformat()})
         refreshed = storage.get_user_by_id(user["user_id"])
 
-        return jsonify({**_build_auth_payload(refreshed), "message": "Login successful"}), 200
+        return jsonify({"success": True, **_build_auth_payload(refreshed), "message": "Login successful"}), 200
 
     except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+        app.logger.exception("Login error")
+        return jsonify({"success": False, "message": "Login failed", "error": "Login failed"}), 500
 
 @app.route("/api/auth/me", methods=["GET"])
 @require_auth()
@@ -427,7 +497,26 @@ def upload_resume():
         temp_filepath = os.path.join(app.config["UPLOAD_FOLDER"], temp_filename)
         file.save(temp_filepath)
 
-        parsed_data = parser.parse_resume(temp_filepath, candidate_name)
+        upload_result = upload_resume_to_supabase(
+            temp_filepath,
+            file.filename,
+            candidate_name=candidate_name,
+            parser=parser,
+        )
+        if not upload_result.get("success"):
+            try:
+                if os.path.exists(temp_filepath):
+                    os.remove(temp_filepath)
+            except OSError:
+                pass
+            return jsonify({"error": clean_text(upload_result.get("error", "Upload failed"))}), 422
+
+        parsed_data = clean_payload(upload_result.get("parsed_data", {}))
+
+        app.logger.info(
+            "Extracted Resume Preview: %s",
+            clean_text((parsed_data.get("full_text") or "")[:300]),
+        )
 
         user_resolution = _resolve_candidate_user_from_upload(parsed_data)
         user = user_resolution["user"]
@@ -440,13 +529,9 @@ def upload_resume():
         if os.path.abspath(temp_filepath) != os.path.abspath(final_filepath):
             os.replace(temp_filepath, final_filepath)
 
-
-        # upload to supabase storage
-        supabase_url = upload_resume_to_supabase(final_filepath, final_filename)
-
-        # use supabase url if upload success
-        if supabase_url:
-            parsed_data["resume_url"] = supabase_url
+        # use Supabase URL returned from upload service
+        if upload_result.get("public_url"):
+            parsed_data["resume_url"] = upload_result["public_url"]
         else:
             parsed_data["resume_url"] = f"/api/uploads/{final_filename}"
 
@@ -475,6 +560,25 @@ def upload_resume():
         }
         parsed_data["profile_insights"] = {}
         parsed_data["profile_status"] = {}
+
+        # Best-effort sync to Supabase table for parsed profile visibility.
+        try:
+            supabase.table("resumes").upsert(
+                {
+                    "candidate_id": candidate_id,
+                    "candidate_name": clean_text(parsed_data.get("candidate_name", candidate_name)),
+                    "email": clean_text(parsed_data.get("contact", {}).get("email", "")),
+                    "phone": clean_text(parsed_data.get("contact", {}).get("phone", "")),
+                    "skills": parsed_data.get("skills", []),
+                    "education": parsed_data.get("education", []),
+                    "experience": parsed_data.get("experience", []),
+                    "resume_url": clean_text(parsed_data.get("resume_url", "")),
+                    "updated_at": datetime.utcnow().isoformat(),
+                },
+                on_conflict="candidate_id",
+            ).execute()
+        except Exception as e:
+            app.logger.warning("Supabase parsed resume sync skipped: %s", clean_text(str(e)))
 
         storage.upsert_candidate(parsed_data, user_id=user["user_id"])
         user = storage.get_user_by_id(user["user_id"]) or user
@@ -505,7 +609,7 @@ def upload_resume():
             "generated_password": generated_password,
             "message": "Resume parsed successfully",
         }
-        return jsonify(response_data), 200
+        return jsonify(clean_payload(response_data)), 200
 
     except ValueError as exc:
         return jsonify({"error": str(exc)}), 400
@@ -724,6 +828,84 @@ def list_jobs():
     try:
         jobs = storage.list_jobs()
         return jsonify({"jobs": jobs, "total_jobs": len(jobs)}), 200
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
+
+
+@app.route("/api/jobs/recent", methods=["GET"])
+def list_recent_jobs():
+    try:
+        limit_raw = request.args.get("limit", "8")
+        try:
+            limit = int(limit_raw)
+        except ValueError:
+            limit = 8
+        limit = max(5, min(limit, 10))
+
+        recent_jobs = storage.list_recent_jobs(limit)
+        payload = [
+            {
+                "id": job.get("job_id"),
+                "title": clean_text(job.get("job_title", "")),
+                "company": clean_text(job.get("company_name") or "Confidential Company"),
+                "skills": job.get("required_skills", []),
+                "applicants": int(job.get("applicants", 0) or 0),
+                "created_at": job.get("created_at"),
+            }
+            for job in recent_jobs
+        ]
+        return jsonify({"jobs": payload, "total_jobs": len(payload)}), 200
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
+
+
+@app.route("/api/jobs/<job_id>/apply", methods=["POST"])
+def apply_recent_job(job_id: str):
+    try:
+        data = request.get_json(silent=True) or {}
+        user_id = clean_text(data.get("userId") or "").strip()
+        if not user_id:
+            return jsonify({"error": "userId is required"}), 400
+
+        job = storage.get_job(job_id)
+        if not job:
+            return jsonify({"error": "Job not found"}), 404
+
+        job_skills = job.get("required_skills") or matcher.extract_job_skills(job.get("job_description", ""))
+        candidate_skills = []
+
+        user = storage.get_user_by_id(user_id)
+        if user and user.get("role") == "candidate":
+            candidate = storage.get_candidate_by_user(user_id)
+            if candidate:
+                candidate_skills = candidate.get("skills", [])
+
+        if not candidate_skills and isinstance(data.get("candidateSkills"), list):
+            candidate_skills = data.get("candidateSkills", [])
+
+        match_result = calculate_match_score(job_skills, candidate_skills)
+
+        application = storage.create_application(
+            user_id=user_id,
+            job_id=job_id,
+            status="pending",
+            match_score=match_result["score"],
+        )
+        applicants = storage.count_job_applicants(job_id)
+
+        return jsonify(
+            {
+                "success": True,
+                "message": "Application submitted",
+                "jobId": job_id,
+                "userId": user_id,
+                "applicants": applicants,
+                "match_score": match_result["score"],
+                "matched_skills": match_result["matched"],
+                "missing_skills": match_result["missing"],
+                "application": application,
+            }
+        ), 200
     except Exception as exc:
         return jsonify({"error": str(exc)}), 500
 
@@ -1046,7 +1228,7 @@ _ensure_default_admin()
 
 
 if __name__ == "__main__":
-    print("Starting ResumeIQ API Server...")
-    print("Server running on http://localhost:5000")
-    print("Default admin from env ADMIN_EMAIL / ADMIN_PASSWORD")
+    app.logger.info("Starting ResumeIQ API Server...")
+    app.logger.info("Server running on http://localhost:5000")
+    app.logger.info("Default admin from env ADMIN_EMAIL / ADMIN_PASSWORD")
     app.run(debug=True, host="0.0.0.0", port=5000)

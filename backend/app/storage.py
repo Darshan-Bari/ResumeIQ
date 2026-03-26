@@ -155,7 +155,7 @@ class Storage:
 
     @staticmethod
     def _json_dumps(value: Any) -> str:
-        return json.dumps(value or [], ensure_ascii=True)
+        return json.dumps(value or [], ensure_ascii=False)
 
     @staticmethod
     def _json_loads(value: Optional[str], default: Any) -> Any:
@@ -719,6 +719,38 @@ class Storage:
         with self._connect() as conn:
             rows = conn.execute("SELECT * FROM jobs ORDER BY datetime(created_at) DESC").fetchall()
         return [self._row_to_job(row) for row in rows]
+
+    def list_recent_jobs(self, limit: int = 8) -> List[Dict[str, Any]]:
+        safe_limit = max(1, min(int(limit), 20))
+        with self._connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT
+                    j.*,
+                    COUNT(a.id) AS applicants_count
+                FROM jobs j
+                LEFT JOIN applications a ON a.job_id = j.job_id
+                GROUP BY j.job_id
+                ORDER BY datetime(j.created_at) DESC
+                LIMIT ?
+                """,
+                (safe_limit,),
+            ).fetchall()
+
+        jobs: List[Dict[str, Any]] = []
+        for row in rows:
+            job = self._row_to_job(row)
+            job["applicants"] = int(row["applicants_count"] or 0)
+            jobs.append(job)
+        return jobs
+
+    def count_job_applicants(self, job_id: str) -> int:
+        with self._connect() as conn:
+            row = conn.execute(
+                "SELECT COUNT(*) AS count FROM applications WHERE job_id = ?",
+                (job_id,),
+            ).fetchone()
+        return int((row["count"] if row else 0) or 0)
 
     def delete_job(self, job_id: str) -> bool:
         with self._connect() as conn:
