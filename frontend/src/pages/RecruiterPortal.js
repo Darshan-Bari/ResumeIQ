@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import '../styles/RecruiterPortal.css';
 import {
   createJob,
@@ -41,7 +41,7 @@ function RecruiterPortal({ setCurrentRole, authState, onLogout }) {
   const [skillInput, setSkillInput] = useState('');
   const recruiterApproved = Boolean(authState?.user?.is_approved);
 
-  const loadDashboard = async () => {
+  const loadDashboard = useCallback(async () => {
     if (!authState?.token) {
       return;
     }
@@ -62,11 +62,11 @@ function RecruiterPortal({ setCurrentRole, authState, onLogout }) {
     } finally {
       setLoading(false);
     }
-  };
-// eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authState?.token, selectedJobId]);
+
   useEffect(() => {
     loadDashboard();
-  }, [authState?.token]);
+  }, [loadDashboard]);
 
   const handleJobChange = (e) => {
     const { name, value } = e.target;

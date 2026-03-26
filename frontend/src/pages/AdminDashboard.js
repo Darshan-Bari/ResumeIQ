@@ -11,6 +11,7 @@ import {
 
 } from '../services/api';
 
+
 function AdminDashboard({ token, onLogout, setCurrentRole }) {
   const [stats, setStats] = useState({ total_candidates: 0, total_jobs: 0, total_users: 0 });
   const [candidates, setCandidates] = useState([]);
@@ -19,10 +20,11 @@ function AdminDashboard({ token, onLogout, setCurrentRole }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
-  const loadAdminData = async () => {
+  const loadAdminData = useCallback(async ()=> {
     if (!token) {
       return;
     }
+  
 
     setLoading(true);
     setMessage('');
@@ -43,7 +45,8 @@ function AdminDashboard({ token, onLogout, setCurrentRole }) {
     } finally {
       setLoading(false);
     }
-  };
+  },[token]);
+
 
   useEffect(() => {
     loadAdminData();

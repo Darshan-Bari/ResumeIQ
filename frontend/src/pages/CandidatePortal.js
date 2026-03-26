@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import '../styles/CandidatePortal.css';
 import {
   applyToJob,
@@ -81,7 +81,7 @@ function CandidatePortal({ setCurrentRole, authState, onAuthUpdate, onLogout }) 
     });
   };
 
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
     if (!authState?.token) {
       return;
     }
@@ -112,11 +112,11 @@ function CandidatePortal({ setCurrentRole, authState, onAuthUpdate, onLogout }) 
     } finally {
       setLoading(false);
     }
-  };
+  }, [authState?.token]);
 
   useEffect(() => {
     loadDashboardData();
-  }, [authState?.token]);
+  }, [loadDashboardData]);
 
   const handleProfileChange = (e) => {
     const { name, value } = e.target;
