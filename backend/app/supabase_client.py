@@ -148,7 +148,7 @@ def upload_resume_to_supabase(
                 {"content-type": "application/pdf"}
             )
 
-        public_url = supabase.storage.from_("resumes").get_public_url(file_name)
+        public_url = supabase.storage.from_("resumes").get_public_url(file_name)["publicUrl"]
         logger.info("Resume upload successful: %s", file_name)
 
         parser_obj = parser
