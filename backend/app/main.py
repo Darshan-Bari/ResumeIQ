@@ -532,8 +532,12 @@ def upload_resume():
         # use Supabase URL returned from upload service
         if upload_result.get("public_url"):
             parsed_data["resume_url"] = upload_result["public_url"]
-        else:
-            parsed_data["resume_url"] = f"/api/uploads/{final_filename}"
+
+        if not upload_result.get("public_url"):
+            return jsonify({"error": "Failed to upload resume to storage"}), 500
+
+        parsed_data["resume_url"] = upload_result["public_url"]
+
 
         if existing_candidate and existing_candidate.get("file_path") and os.path.exists(existing_candidate["file_path"]):
             old_path = existing_candidate["file_path"]
