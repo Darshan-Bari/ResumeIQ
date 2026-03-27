@@ -112,7 +112,7 @@ function HeroSection({ onUploadResume, onExploreDashboard }) {
 
         <div className="hero-stats">
           <div className="stat-item">
-            <h3>10K+</h3>
+            <h3>100+</h3>
             <p>Resumes Analyzed</p>
           </div>
           <div className="stat-item">
@@ -120,7 +120,7 @@ function HeroSection({ onUploadResume, onExploreDashboard }) {
             <p>Match Accuracy</p>
           </div>
           <div className="stat-item">
-            <h3>500+</h3>
+            <h3>50+</h3>
             <p>Companies</p>
           </div>
         </div>
